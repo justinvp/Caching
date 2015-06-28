@@ -15,7 +15,7 @@ namespace Microsoft.Framework.Caching.SqlServer
 
         public static SqlParameterCollection AddCacheItemId(this SqlParameterCollection parameters, string value)
         {
-            return parameters.AddWithValue(Columns.Names.CacheItemId, SqlDbType.NVarChar, 100, value);
+            return parameters.AddWithValue(Columns.Names.CacheItemId, SqlDbType.NVarChar, 900, value);
         }
 
         public static SqlParameterCollection AddCacheItemValue(this SqlParameterCollection parameters, byte[] value)
@@ -37,9 +37,9 @@ namespace Microsoft.Framework.Caching.SqlServer
 
         public static SqlParameterCollection AddExpiresAtTime(
             this SqlParameterCollection parameters,
-            DateTime utcTime)
+            DateTimeOffset utcTime)
         {
-            return parameters.AddWithValue(Columns.Names.ExpiresAtTimeUTC, SqlDbType.DateTime, utcTime);
+            return parameters.AddWithValue(Columns.Names.ExpiresAtTime, SqlDbType.DateTimeOffset, utcTime);
         }
 
         public static SqlParameterCollection AddSlidingExpirationInTicks(
@@ -59,16 +59,17 @@ namespace Microsoft.Framework.Caching.SqlServer
 
         public static SqlParameterCollection AddAbsoluteExpiration(
             this SqlParameterCollection parameters,
-            DateTime? utcTime)
+            DateTimeOffset? utcTime)
         {
             if (utcTime.HasValue)
             {
                 return parameters.AddWithValue(
-                    Columns.Names.AbsoluteExpirationUTC, SqlDbType.DateTime, utcTime.Value);
+                    Columns.Names.AbsoluteExpiration, SqlDbType.DateTimeOffset, utcTime.Value);
             }
             else
             {
-                return parameters.AddWithValue(Columns.Names.AbsoluteExpirationUTC, SqlDbType.DateTime, DBNull.Value);
+                return parameters.AddWithValue(
+                    Columns.Names.AbsoluteExpiration, SqlDbType.DateTimeOffset, DBNull.Value);
             }
         }
 
@@ -81,7 +82,7 @@ namespace Microsoft.Framework.Caching.SqlServer
             var parameter = new SqlParameter(parameterName, dbType);
             parameter.Value = value;
             parameters.Add(parameter);
-            parameter.ResetSqlDbType(); // required for mono to work
+            parameter.ResetSqlDbType();
             return parameters;
         }
 
@@ -95,7 +96,7 @@ namespace Microsoft.Framework.Caching.SqlServer
             var parameter = new SqlParameter(parameterName, dbType, size);
             parameter.Value = value;
             parameters.Add(parameter);
-            parameter.ResetSqlDbType(); // required for mono to work
+            parameter.ResetSqlDbType();
             return parameters;
         }
     }

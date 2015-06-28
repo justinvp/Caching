@@ -14,7 +14,7 @@ namespace Microsoft.Framework.Caching.SqlServer
         /// The 'SlidingExpiration' here should be interpreted as the minimum time to live for a cache item before
         /// it expires.
         /// Example:
-        /// For a sliding expiration of 30 mins, a new cache item would have its 'ExpiresAtTimeUTC' 60 mins(30 * 2)
+        /// For a sliding expiration of 30 mins, a new cache item would have its 'ExpiresAtTime' 60 mins(30 * 2)
         /// from now. All 'Get' operations before the first 30 mins do not cause any database updates to the cache
         /// item's expiration time and any 'Get' operations between the 30th and 60th minute would cause a database
         /// update where the expiration time is again extended by 60 mins.
@@ -22,63 +22,62 @@ namespace Microsoft.Framework.Caching.SqlServer
         public const int ExpirationTimeMultiplier = 2;
 
         public static CacheItemExpirationInfo GetExpirationInfo(
-            DateTime utcNowDateTime,
+            DateTimeOffset utcNow,
             DistributedCacheEntryOptions options)
         {
             var result = new CacheItemExpirationInfo();
             result.SlidingExpiration = options.SlidingExpiration;
 
             // calculate absolute expiration
-            DateTime? absoluteExpiration = null;
+            DateTimeOffset? absoluteExpiration = null;
             if (options.AbsoluteExpirationRelativeToNow.HasValue)
             {
-                absoluteExpiration = utcNowDateTime.Add(options.AbsoluteExpirationRelativeToNow.Value);
+                absoluteExpiration = utcNow.Add(options.AbsoluteExpirationRelativeToNow.Value);
             }
             else if (options.AbsoluteExpiration.HasValue)
             {
-                var absoluteExpirationInUTCDateTime = options.AbsoluteExpiration.Value.UtcDateTime;
-                if (absoluteExpirationInUTCDateTime <= utcNowDateTime)
+                if (options.AbsoluteExpiration.Value <= utcNow)
                 {
                     throw new InvalidOperationException("The absolute expiration value must be in the future.");
                 }
 
-                absoluteExpiration = absoluteExpirationInUTCDateTime;
+                absoluteExpiration = options.AbsoluteExpiration.Value;
             }
-            result.AbsoluteExpirationUTC = absoluteExpiration;
+            result.AbsoluteExpiration = absoluteExpiration;
 
-            result.ExpiresAtTimeUTC = GetExpirationTimeUTC(
-                result.SlidingExpiration, result.AbsoluteExpirationUTC, utcNowDateTime);
+            result.ExpiresAtTime = GetExpirationTime(
+                result.SlidingExpiration, result.AbsoluteExpiration, utcNow);
 
             return result;
         }
 
-        public static DateTime? GetNewExpirationTime(
-            DateTime utcNowDateTime,
-            DateTime currentExpirationTimeUTC,
+        public static DateTimeOffset? GetNewExpirationTime(
+            DateTimeOffset utcNow,
+            DateTimeOffset currentExpirationTime,
             TimeSpan? slidingExpiration,
-            DateTime? absoluteExpirationUTC)
+            DateTimeOffset? absoluteExpiration)
         {
             // Check if the current item has a sliding expiration and is going to expire within the
             // next timeout period(ex:20 minutes), then extend the expiration time.
             if (slidingExpiration.HasValue &&
-                utcNowDateTime >= (currentExpirationTimeUTC - slidingExpiration.Value))
+                utcNow >= (currentExpirationTime - slidingExpiration.Value))
             {
-                var newExpirationTimeUTC = GetExpirationTimeUTC(
-                    slidingExpiration, absoluteExpirationUTC, utcNowDateTime);
+                var newExpirationTime = GetExpirationTime(
+                    slidingExpiration, absoluteExpiration, utcNow);
 
-                if (currentExpirationTimeUTC != newExpirationTimeUTC)
+                if (currentExpirationTime != newExpirationTime)
                 {
-                    return newExpirationTimeUTC;
+                    return newExpirationTime;
                 }
             }
 
             return null;
         }
 
-        private static DateTime GetExpirationTimeUTC(
-            TimeSpan? slidingExpiration, DateTime? absoluteExpirationUTC, DateTime utcNow)
+        private static DateTimeOffset GetExpirationTime(
+            TimeSpan? slidingExpiration, DateTimeOffset? absoluteExpiration, DateTimeOffset utcNow)
         {
-            if (!slidingExpiration.HasValue && !absoluteExpirationUTC.HasValue)
+            if (!slidingExpiration.HasValue && !absoluteExpiration.HasValue)
             {
                 throw new InvalidOperationException("Either absolute or sliding expiration needs " +
                     "to be provided.");
@@ -90,15 +89,15 @@ namespace Microsoft.Framework.Caching.SqlServer
                 // not exceed the absolute expiration.
                 var newSlidingExpirationTime = utcNow + TimeSpan.FromTicks(
                     ExpirationTimeMultiplier * slidingExpiration.Value.Ticks);
-                if (absoluteExpirationUTC.HasValue && newSlidingExpirationTime > absoluteExpirationUTC.Value)
+                if (absoluteExpiration.HasValue && newSlidingExpirationTime > absoluteExpiration.Value)
                 {
-                    return absoluteExpirationUTC.Value;
+                    return absoluteExpiration.Value;
                 }
 
                 return newSlidingExpirationTime;
             }
 
-            return absoluteExpirationUTC.Value;
+            return absoluteExpiration.Value;
         }
     }
 }

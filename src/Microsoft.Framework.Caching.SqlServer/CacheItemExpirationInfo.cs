@@ -8,10 +8,10 @@ namespace Microsoft.Framework.Caching.SqlServer
     internal class CacheItemExpirationInfo
     {
         // This should never be null. This value is calculated based on Sliding or Absolute expiration
-        public DateTime ExpiresAtTimeUTC { get; set; }
+        public DateTimeOffset ExpiresAtTime { get; set; }
 
         public TimeSpan? SlidingExpiration { get; set; }
 
-        public DateTime? AbsoluteExpirationUTC { get; set; }
+        public DateTimeOffset? AbsoluteExpiration { get; set; }
     }
 }

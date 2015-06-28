@@ -19,17 +19,9 @@ namespace Microsoft.Framework.Caching.SqlServer
 
         public Program()
         {
-            // TODO: use CommandOutputLogger?
             var loggerFactory = new LoggerFactory();
             loggerFactory.AddConsole();
             _logger = loggerFactory.CreateLogger<Program>();
-
-            var app = new CommandLineApplication();
-            app.Name = "sqlservercache";
-            app.Description = "Creates tables and indexes in Microsoft SQL Server to be used for distributed caching.";
-
-            app.HelpOption("-?|-h|--help");
-            var optVerbose = app.Option("-v|--verbose", "Verbose output", CommandOptionType.NoValue);
         }
 
         public int Main(string[] args)
@@ -42,7 +34,6 @@ namespace Microsoft.Framework.Caching.SqlServer
                     "to be used for distributed caching";
 
                 app.HelpOption("-?|-h|--help");
-                var optVerbose = app.Option("-v|--verbose", "Verbose output", CommandOptionType.NoValue);
 
                 app.Command("create", command =>
                 {

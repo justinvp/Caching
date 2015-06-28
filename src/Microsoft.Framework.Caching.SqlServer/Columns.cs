@@ -9,9 +9,9 @@ namespace Microsoft.Framework.Caching.SqlServer
         {
             public const string CacheItemId = "Id";
             public const string CacheItemValue = "Value";
-            public const string ExpiresAtTimeUTC = "ExpiresAtTimeUTC";
+            public const string ExpiresAtTime = "ExpiresAtTime";
             public const string SlidingExpirationInTicks = "SlidingExpirationInTicks";
-            public const string AbsoluteExpirationUTC = "AbsoluteExpirationUTC";
+            public const string AbsoluteExpiration = "AbsoluteExpiration";
         }
 
         public static class Indexes
@@ -19,9 +19,9 @@ namespace Microsoft.Framework.Caching.SqlServer
             // The value of the following index positions is dependent on how the SQL queries
             // are selecting the columns.
             public const int CacheItemIdIndex = 0;
-            public const int ExpiresAtTimeUTCIndex = 1;
+            public const int ExpiresAtTimeIndex = 1;
             public const int SlidingExpirationInTicksIndex = 2;
-            public const int AbsoluteExpirationUTCIndex = 3;
+            public const int AbsoluteExpirationIndex = 3;
             public const int CacheItemValueIndex = 4;
         }
     }

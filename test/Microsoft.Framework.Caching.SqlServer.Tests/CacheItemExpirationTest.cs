@@ -27,11 +27,11 @@ namespace Microsoft.Framework.Caching.SqlServer
             var testClock = new TestClock();
 
             // Act
-            var expirationInfo = CacheItemExpiration.GetExpirationInfo(testClock.UtcDateTime, options);
+            var expirationInfo = CacheItemExpiration.GetExpirationInfo(testClock.UtcNow, options);
 
             // Assert
-            Assert.Equal(testClock.UtcDateTime + timeSpan, expirationInfo.AbsoluteExpirationUTC);
-            Assert.Equal(expirationInfo.AbsoluteExpirationUTC, expirationInfo.ExpiresAtTimeUTC);
+            Assert.Equal(testClock.UtcNow + timeSpan, expirationInfo.AbsoluteExpiration);
+            Assert.Equal(expirationInfo.AbsoluteExpiration, expirationInfo.ExpiresAtTime);
             Assert.False(expirationInfo.SlidingExpiration.HasValue);
         }
 
@@ -49,11 +49,11 @@ namespace Microsoft.Framework.Caching.SqlServer
             };
 
             // Act
-            var expirationInfo = CacheItemExpiration.GetExpirationInfo(testClock.UtcDateTime, options);
+            var expirationInfo = CacheItemExpiration.GetExpirationInfo(testClock.UtcNow, options);
 
             // Assert
-            Assert.Equal(absoluteExpiration.UtcDateTime, expirationInfo.AbsoluteExpirationUTC);
-            Assert.Equal(expirationInfo.AbsoluteExpirationUTC, expirationInfo.ExpiresAtTimeUTC);
+            Assert.Equal(absoluteExpiration.UtcDateTime, expirationInfo.AbsoluteExpiration);
+            Assert.Equal(expirationInfo.AbsoluteExpiration, expirationInfo.ExpiresAtTime);
             Assert.False(expirationInfo.SlidingExpiration.HasValue);
         }
 
@@ -63,7 +63,7 @@ namespace Microsoft.Framework.Caching.SqlServer
             // Arrange
             var testClock = new TestClock();
             var slidingExpiration = TimeSpan.FromMinutes(20);
-            var expectedValue = testClock.UtcDateTime
+            var expectedValue = testClock.UtcNow
                 + TimeSpan.FromTicks((CacheItemExpiration.ExpirationTimeMultiplier * slidingExpiration.Ticks));
             var options = new DistributedCacheEntryOptions()
             {
@@ -73,12 +73,12 @@ namespace Microsoft.Framework.Caching.SqlServer
             };
 
             // Act
-            var expirationInfo = CacheItemExpiration.GetExpirationInfo(testClock.UtcDateTime, options);
+            var expirationInfo = CacheItemExpiration.GetExpirationInfo(testClock.UtcNow, options);
 
             // Assert
-            Assert.Equal(expectedValue, expirationInfo.ExpiresAtTimeUTC);
+            Assert.Equal(expectedValue, expirationInfo.ExpiresAtTime);
             Assert.Equal(slidingExpiration, expirationInfo.SlidingExpiration);
-            Assert.False(expirationInfo.AbsoluteExpirationUTC.HasValue);
+            Assert.False(expirationInfo.AbsoluteExpiration.HasValue);
         }
 
         [Fact]
@@ -88,7 +88,7 @@ namespace Microsoft.Framework.Caching.SqlServer
             var testClock = new TestClock();
             var slidingExpiration = TimeSpan.FromMinutes(20);
             var absoluteExpiration = testClock.UtcNow.AddHours(1);
-            var expectedExpiresAtTimeUTC = testClock.UtcDateTime
+            var expectedExpiresAtTime = testClock.UtcNow
                 + TimeSpan.FromTicks((CacheItemExpiration.ExpirationTimeMultiplier * slidingExpiration.Ticks));
             var options = new DistributedCacheEntryOptions()
             {
@@ -98,12 +98,12 @@ namespace Microsoft.Framework.Caching.SqlServer
             };
 
             // Act
-            var expirationInfo = CacheItemExpiration.GetExpirationInfo(testClock.UtcDateTime, options);
+            var expirationInfo = CacheItemExpiration.GetExpirationInfo(testClock.UtcNow, options);
 
             // Assert
-            Assert.Equal(expectedExpiresAtTimeUTC, expirationInfo.ExpiresAtTimeUTC);
+            Assert.Equal(expectedExpiresAtTime, expirationInfo.ExpiresAtTime);
             Assert.Equal(slidingExpiration, expirationInfo.SlidingExpiration);
-            Assert.Equal(absoluteExpiration.UtcDateTime, expirationInfo.AbsoluteExpirationUTC);
+            Assert.Equal(absoluteExpiration.UtcDateTime, expirationInfo.AbsoluteExpiration);
         }
 
         [Theory]
@@ -116,7 +116,7 @@ namespace Microsoft.Framework.Caching.SqlServer
             var testClock = new TestClock();
             var slidingExpiration = TimeSpan.FromMinutes(20);
             var absoluteExpiration = testClock.UtcNow.AddHours(1);
-            var expectedExpiresAtTimeUTC = absoluteExpiration.UtcDateTime;
+            var expectedExpiresAtTime = absoluteExpiration.UtcDateTime;
             var options = new DistributedCacheEntryOptions()
             {
                 AbsoluteExpirationRelativeToNow = null,
@@ -126,12 +126,12 @@ namespace Microsoft.Framework.Caching.SqlServer
             testClock.Add(TimeSpan.FromMinutes(minutes));
 
             // Act
-            var expirationInfo = CacheItemExpiration.GetExpirationInfo(testClock.UtcDateTime, options);
+            var expirationInfo = CacheItemExpiration.GetExpirationInfo(testClock.UtcNow, options);
 
             // Assert
-            Assert.Equal(expectedExpiresAtTimeUTC, expirationInfo.ExpiresAtTimeUTC);
+            Assert.Equal(expectedExpiresAtTime, expirationInfo.ExpiresAtTime);
             Assert.Equal(slidingExpiration, expirationInfo.SlidingExpiration);
-            Assert.Equal(absoluteExpiration.UtcDateTime, expirationInfo.AbsoluteExpirationUTC);
+            Assert.Equal(absoluteExpiration.UtcDateTime, expirationInfo.AbsoluteExpiration);
         }
     }
 }

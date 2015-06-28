@@ -10,22 +10,15 @@ namespace Microsoft.Framework.Internal
         public TestClock()
         {
             // Examples:
-            // DateTime.Now:            6/11/2015 3:34:23 PM
-            // DateTime.UtcNow:         6/11/2015 10:34:23 PM
-            // DateTimeOffset.Now:      6/11/2015 3:34:23 PM - 07:00
-            // DateTimeOffset.UtcNow:   6/11/2015 10:34:23 PM + 00:00 -> no offset for UTC
+            // DateTime.Now:                6/29/2015 1:20:40 PM
+            // DateTime.UtcNow:             6/29/2015 8:20:40 PM
+            // DateTimeOffset.Now:          6/29/2015 1:20:40 PM - 07:00
+            // DateTimeOffset.UtcNow:       6/29/2015 8:20:40 PM + 00:00
+            // DateTimeOffset.UtcDateTime:  6/29/2015 8:20:40 PM
             UtcNow = new DateTimeOffset(2013, 1, 1, 1, 0, 0, offset: TimeSpan.Zero);
         }
 
         public DateTimeOffset UtcNow { get; private set; }
-
-        public DateTime UtcDateTime
-        {
-            get
-            {
-                return UtcNow.UtcDateTime;
-            }
-        }
 
         public TestClock Add(TimeSpan timeSpan)
         {

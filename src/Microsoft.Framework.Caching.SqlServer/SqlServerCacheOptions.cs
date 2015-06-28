@@ -14,9 +14,9 @@ namespace Microsoft.Framework.Caching.SqlServer
         public ISystemClock SystemClock { get; set; }
 
         /// <summary>
-        /// The periodic interval to scan and delete expired items in the cache. Default is 60 minutes.
+        /// The periodic interval to scan and delete expired items in the cache. Default is 30 minutes.
         /// </summary>
-        public TimeSpan ExpiredItemsDeletionInterval { get; set; }
+        public TimeSpan? ExpiredItemsDeletionInterval { get; set; }
 
         /// <summary>
         /// The connection string to the database.

@@ -15,11 +15,13 @@ namespace Microsoft.Framework.Caching.SqlServer
     /// </summary>
     public class SqlServerCache : IDistributedCache
     {
-        private readonly TimeSpan MinimumExpiredItemsDeletionInterval = TimeSpan.FromHours(1);
+        private static readonly TimeSpan MinimumExpiredItemsDeletionInterval = TimeSpan.FromMinutes(5);
+        private static readonly TimeSpan DefaultExpiredItemsDeletionInterval = TimeSpan.FromMinutes(30);
+
         private readonly IDatabaseOperations _dbOperations;
         private readonly ISystemClock _systemCock;
         private readonly TimeSpan _expiredItemsDeletionInterval;
-        private DateTime _lastExpirationScanUTC;
+        private DateTimeOffset _lastExpirationScan;
 
         public SqlServerCache(IOptions<SqlServerCacheOptions> options)
         {
@@ -40,7 +42,8 @@ namespace Microsoft.Framework.Caching.SqlServer
                 throw new ArgumentException(
                     $"{nameof(SqlServerCacheOptions.TableName)} cannot be empty or null.");
             }
-            if (cacheOptions.ExpiredItemsDeletionInterval < MinimumExpiredItemsDeletionInterval)
+            if (cacheOptions.ExpiredItemsDeletionInterval.HasValue &&
+                cacheOptions.ExpiredItemsDeletionInterval.Value < MinimumExpiredItemsDeletionInterval)
             {
                 throw new ArgumentException(
                     $"{nameof(SqlServerCacheOptions.ExpiredItemsDeletionInterval)} cannot be less the minimum " +
@@ -48,7 +51,8 @@ namespace Microsoft.Framework.Caching.SqlServer
             }
 
             _systemCock = cacheOptions.SystemClock ?? new SystemClock();
-            _expiredItemsDeletionInterval = cacheOptions.ExpiredItemsDeletionInterval;
+            _expiredItemsDeletionInterval =
+                cacheOptions.ExpiredItemsDeletionInterval ?? DefaultExpiredItemsDeletionInterval;
 
             // SqlClient library on Mono doesn't have support for DateTimeOffset and also
             // it doesn't have support for apis like GetFieldValue, GetFieldValueAsync etc.
@@ -150,10 +154,10 @@ namespace Microsoft.Framework.Caching.SqlServer
         // If sufficient time has elapsed then a scan is initiated on a background task.
         private void ScanForExpiredItemsIfRequired()
         {
-            var utcNow = _systemCock.UtcNow.UtcDateTime;
-            if ((utcNow - _lastExpirationScanUTC) > _expiredItemsDeletionInterval)
+            var utcNow = _systemCock.UtcNow;
+            if ((utcNow - _lastExpirationScan) > _expiredItemsDeletionInterval)
             {
-                _lastExpirationScanUTC = utcNow;
+                _lastExpirationScan = utcNow;
                 ThreadPool.QueueUserWorkItem(DeleteExpiredCacheItems, state: null);
             }
         }
