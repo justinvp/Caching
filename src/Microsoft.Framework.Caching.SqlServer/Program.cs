@@ -53,7 +53,7 @@ namespace Microsoft.Framework.Caching.SqlServer
                         || string.IsNullOrEmpty(schemaNameArg.Value)
                         || string.IsNullOrEmpty(tableNameArg.Value))
                         {
-                            _logger.LogWarning("Invalid input.");
+                            _logger.LogWarning("Invalid input");
                             app.ShowHelp();
                             return 2;
                         }
