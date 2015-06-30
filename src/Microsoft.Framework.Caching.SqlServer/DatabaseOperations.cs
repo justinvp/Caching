@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Linq;
 using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
@@ -12,7 +13,16 @@ namespace Microsoft.Framework.Caching.SqlServer
 {
     internal class DatabaseOperations : IDatabaseOperations
     {
-        protected const string DuplicateKeyErrorText = "Violation of PRIMARY KEY constraint";
+        /// <summary>
+        /// Since there is no specific exception type representing a 'duplicate key' error, we are relying on
+        /// the following message number which represents the following text in Microsoft SQL Server database.
+        ///     "Violation of %ls constraint '%.*ls'. Cannot insert duplicate key in object '%.*ls'.
+        ///     The duplicate key value is %ls."
+        /// You can find the list of system messages by executing the following query:
+        /// "SELECT * FROM sys.messages WHERE [text] LIKE '%duplicate%'"
+        /// </summary>
+        private const int DuplicateKeyErrorId = 2627;
+
         protected const string GetTableSchemaErrorText =
             "Could not retrieve information of table with schema '{0}' and " +
             "name '{1}'. Make sure you have the table setup and try again. " +
@@ -157,7 +167,7 @@ namespace Microsoft.Framework.Caching.SqlServer
                 }
                 catch (SqlException ex)
                 {
-                    if (ex.Message.IndexOf(DuplicateKeyErrorText, StringComparison.OrdinalIgnoreCase) > 0)
+                    if (IsDuplicateKeyException(ex))
                     {
                         // There is a possibility that multiple requests can try to add the same item to the cache, in
                         // which case we receive a 'duplicate key' exception on the primary key column.
@@ -194,7 +204,7 @@ namespace Microsoft.Framework.Caching.SqlServer
                 }
                 catch (SqlException ex)
                 {
-                    if (ex.Message.IndexOf(DuplicateKeyErrorText, StringComparison.OrdinalIgnoreCase) > 0)
+                    if (IsDuplicateKeyException(ex))
                     {
                         // There is a possibility that multiple requests can try to add the same item to the cache, in
                         // which case we receive a 'duplicate key' exception on the primary key column.
@@ -388,6 +398,15 @@ namespace Microsoft.Framework.Caching.SqlServer
                     await command.ExecuteNonQueryAsync();
                 }
             }
+        }
+
+        protected bool IsDuplicateKeyException(SqlException ex)
+        {
+            if (ex.Errors != null)
+            {
+                return ex.Errors.Cast<SqlError>().Any(error => error.Number == DuplicateKeyErrorId);
+            }
+            return false;
         }
     }
 }

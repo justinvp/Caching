@@ -171,7 +171,7 @@ namespace Microsoft.Framework.Caching.SqlServer
                 }
                 catch (SqlException ex)
                 {
-                    if (ex.Message.IndexOf(DuplicateKeyErrorText, StringComparison.OrdinalIgnoreCase) > 0)
+                    if (IsDuplicateKeyException(ex))
                     {
                         // There is a possibility that multiple requests can try to add the same item to the cache, in
                         // which case we receive a 'duplicate key' exception on the primary key column.
@@ -208,7 +208,7 @@ namespace Microsoft.Framework.Caching.SqlServer
                 }
                 catch (SqlException ex)
                 {
-                    if (ex.Message.IndexOf(DuplicateKeyErrorText, StringComparison.OrdinalIgnoreCase) > 0)
+                    if (IsDuplicateKeyException(ex))
                     {
                         // There is a possibility that multiple requests can try to add the same item to the cache, in
                         // which case we receive a 'duplicate key' exception on the primary key column.
