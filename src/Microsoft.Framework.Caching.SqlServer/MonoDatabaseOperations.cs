@@ -169,10 +169,17 @@ namespace Microsoft.Framework.Caching.SqlServer
                 {
                     upsertCommand.ExecuteNonQuery();
                 }
-                catch (SqlException)
+                catch (SqlException ex)
                 {
-                    // There is a possibility that multiple requests can try to add the same item to the cache, in
-                    // which case we receive a 'duplicate key' exception on the primary key column.
+                    if (ex.Message.IndexOf(DuplicateKeyErrorText, StringComparison.OrdinalIgnoreCase) > 0)
+                    {
+                        // There is a possibility that multiple requests can try to add the same item to the cache, in
+                        // which case we receive a 'duplicate key' exception on the primary key column.
+                    }
+                    else
+                    {
+                        throw ex;
+                    }
                 }
             }
         }
@@ -199,10 +206,17 @@ namespace Microsoft.Framework.Caching.SqlServer
                 {
                     await upsertCommand.ExecuteNonQueryAsync();
                 }
-                catch (SqlException)
+                catch (SqlException ex)
                 {
-                    // There is a possibility that multiple requests can try to add the same item to the cache, in
-                    // which case we receive a 'duplicate key' exception on the primary key column.
+                    if (ex.Message.IndexOf(DuplicateKeyErrorText, StringComparison.OrdinalIgnoreCase) > 0)
+                    {
+                        // There is a possibility that multiple requests can try to add the same item to the cache, in
+                        // which case we receive a 'duplicate key' exception on the primary key column.
+                    }
+                    else
+                    {
+                        throw ex;
+                    }
                 }
             }
         }

@@ -28,18 +28,18 @@ namespace Microsoft.Framework.Caching.SqlServer
         {
             try
             {
+                var description = "Creates table and indexes in Microsoft SQL Server database " +
+                    "to be used for distributed caching";
+
                 var app = new CommandLineApplication();
                 app.Name = "sqlservercache";
-                app.Description = "Creates table and indexes in Microsoft SQL Server database " +
-                    "to be used for distributed caching";
+                app.Description = description;
 
                 app.HelpOption("-?|-h|--help");
 
                 app.Command("create", command =>
                 {
-                    command.Description = "Creates table and indexes in Microsoft SQL Server database " +
-                    "to be used for distributed caching";
-
+                    command.Description = description;
                     var connectionStringArg = command.Argument(
                         "[connectionString]",
                         "The connection string to connect to the database.");

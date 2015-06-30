@@ -10,7 +10,7 @@ namespace Microsoft.Framework.Caching.SqlServer
     internal static class SqlParameterCollectionExtensions
     {
         // For all values where the length is less than the below value, try setting the size of the
-        // parameter for improved performance.
+        // parameter for better performance.
         public const int DefaultValueColumnWidth = 8000;
 
         public static SqlParameterCollection AddCacheItemId(this SqlParameterCollection parameters, string value)

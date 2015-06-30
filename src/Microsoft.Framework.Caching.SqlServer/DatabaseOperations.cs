@@ -12,7 +12,11 @@ namespace Microsoft.Framework.Caching.SqlServer
 {
     internal class DatabaseOperations : IDatabaseOperations
     {
-        private const string DuplicateKeyErrorText = "Violation of PRIMARY KEY constraint";
+        protected const string DuplicateKeyErrorText = "Violation of PRIMARY KEY constraint";
+        protected const string GetTableSchemaErrorText =
+            "Could not retrieve information of table with schema '{0}' and " +
+            "name '{1}'. Make sure you have the table setup and try again. " +
+            "Connection string: {2}";
 
         public DatabaseOperations(
             string connectionString, string schemaName, string tableName, ISystemClock systemClock)
@@ -92,9 +96,7 @@ namespace Microsoft.Framework.Caching.SqlServer
                 if (!reader.Read())
                 {
                     throw new InvalidOperationException(
-                        $"Could not retrieve information of table with schema '{SchemaName}' and " +
-                        $"name '{TableName}'. Make sure you have the table setup and try again. " +
-                        $"Connection string: {ConnectionString}");
+                        string.Format(GetTableSchemaErrorText, SchemaName, TableName, ConnectionString));
                 }
             }
         }
@@ -111,9 +113,7 @@ namespace Microsoft.Framework.Caching.SqlServer
                 if (!await reader.ReadAsync())
                 {
                     throw new InvalidOperationException(
-                        $"Could not retrieve information of table with schema '{SchemaName}' and " +
-                        $"name '{TableName}'. Make sure you have the table setup and try again. " +
-                        $"Connection string: {ConnectionString}");
+                        string.Format(GetTableSchemaErrorText, SchemaName, TableName, ConnectionString));
                 }
             }
         }
