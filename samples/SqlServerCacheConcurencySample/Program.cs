@@ -16,8 +16,12 @@ namespace SqlServerCacheConcurrencySample
 {
     /// <summary>
     /// This sample requires setting up a Microsoft SQL Server based cache database.
-    /// 1. Create a new database or use as existing gone.
-    /// 2. Run the command "dnx . sqlservercache create <connectionstring> <schemName> <tableName>" to setup the table.
+    /// 1. Install the command globally by doing "dnx commands install Microsoft.Framework.Caching.SqlServer". This
+    ///    installs a command called "sqlservercache".
+    /// 2. Create a new database in the SQL Server or use as existing gone.
+    /// 3. Run the command "sqlservercache create <connectionstring> <schemName> <tableName>" to setup the table and
+    ///    indexes.
+    /// 4. Run this sample by doing "dnx . run"
     /// </summary>
     public class Program
     {
