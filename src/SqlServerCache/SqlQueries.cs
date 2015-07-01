@@ -10,7 +10,7 @@ namespace SqlServerCache
             "Id nvarchar(900) COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL, " +
             "Value varbinary(MAX) NOT NULL, " +
             "ExpiresAtTime datetimeoffset NOT NULL, " +
-            "SlidingExpirationInTicks bigint NULL," +
+            "SlidingExpirationInSeconds bigint NULL," +
             "AbsoluteExpiration datetimeoffset NULL, " +
             "CONSTRAINT pk_Id PRIMARY KEY (Id))";
 

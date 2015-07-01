@@ -35,25 +35,18 @@ namespace Microsoft.Framework.Caching.SqlServer
             }
         }
 
-        public static SqlParameterCollection AddExpiresAtTime(
-            this SqlParameterCollection parameters,
-            DateTimeOffset utcTime)
-        {
-            return parameters.AddWithValue(Columns.Names.ExpiresAtTime, SqlDbType.DateTimeOffset, utcTime);
-        }
-
-        public static SqlParameterCollection AddSlidingExpirationInTicks(
+        public static SqlParameterCollection AddSlidingExpirationInSeconds(
             this SqlParameterCollection parameters,
             TimeSpan? value)
         {
             if (value.HasValue)
             {
                 return parameters.AddWithValue(
-                    Columns.Names.SlidingExpirationInTicks, SqlDbType.BigInt, value.Value.Ticks);
+                    Columns.Names.SlidingExpirationInSeconds, SqlDbType.BigInt, value.Value.TotalSeconds);
             }
             else
             {
-                return parameters.AddWithValue(Columns.Names.SlidingExpirationInTicks, SqlDbType.BigInt, DBNull.Value);
+                return parameters.AddWithValue(Columns.Names.SlidingExpirationInSeconds, SqlDbType.BigInt, DBNull.Value);
             }
         }
 

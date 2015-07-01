@@ -11,32 +11,47 @@ namespace Microsoft.Framework.Caching.SqlServer
             "WHERE TABLE_SCHEMA = '{0}' " +
             "AND TABLE_NAME = '{1}'";
 
-        private const string GetCacheItemFormat =
-            "SELECT Id, ExpiresAtTime, SlidingExpirationInTicks, AbsoluteExpiration, Value " +
-            "FROM {0} WHERE Id = @Id AND @UtcNow <= ExpiresAtTime";
+        private const string UpdateCacheItemFormat =
+        "UPDATE {0} " +
+        "SET ExpiresAtTime = " +
+            "(CASE " +
+                "WHEN DATEDIFF(SECOND, @UtcNow, AbsoluteExpiration) <= SlidingExpirationInSeconds " +
+                "THEN AbsoluteExpiration " +
+                "ELSE " +
+                "DATEADD(SECOND, SlidingExpirationInSeconds, @UtcNow) " +
+            "END) " +
+        "WHERE Id = @Id " +
+        "AND @UtcNow <= ExpiresAtTime " +
+        "AND SlidingExpirationInSeconds IS NOT NULL " +
+        "AND (AbsoluteExpiration IS NULL OR AbsoluteExpiration <> ExpiresAtTime) ;";
 
-        private const string GetCacheItemExpirationInfoFormat =
-            "SELECT Id, ExpiresAtTime, SlidingExpirationInTicks, AbsoluteExpiration " +
-            "FROM {0} WHERE Id = @Id AND @UtcNow <= ExpiresAtTime";
+        private const string GetCacheItemFormat =
+            "SELECT Id, ExpiresAtTime, SlidingExpirationInSeconds, AbsoluteExpiration, Value " +
+            "FROM {0} WHERE Id = @Id AND @UtcNow <= ExpiresAtTime;";
 
         private const string SetCacheItemFormat =
+            "DECLARE @ExpiresAtTime DATETIMEOFFSET; " +
+            "SET @ExpiresAtTime = " +
+            "(CASE " +
+                    "WHEN (@SlidingExpirationInSeconds IS NUll) " +
+                    "THEN @AbsoluteExpiration " +
+                    "ELSE " +
+                    "DATEADD(SECOND, Convert(bigint, @SlidingExpirationInSeconds), @UtcNow) " +
+            "END);" +
             "IF NOT EXISTS(SELECT Id FROM {0} WHERE Id = @Id) " +
             "BEGIN " +
                 "INSERT INTO {0} " +
-                    "(Id, Value, ExpiresAtTime, SlidingExpirationInTicks, AbsoluteExpiration) " +
-                    "VALUES (@Id, @Value, @ExpiresAtTime, @SlidingExpirationInTicks, @AbsoluteExpiration) " +
+                    "(Id, Value, ExpiresAtTime, SlidingExpirationInSeconds, AbsoluteExpiration) " +
+                    "VALUES (@Id, @Value, @ExpiresAtTime, @SlidingExpirationInSeconds, @AbsoluteExpiration); " +
             "END " +
             "ELSE " +
             "BEGIN " +
-                "UPDATE {0} SET Value = @Value, ExpiresAtTime = @ExpiresAtTime, " +
-                "SlidingExpirationInTicks = @SlidingExpirationInTicks, AbsoluteExpiration = @AbsoluteExpiration " +
-                "WHERE Id = @Id " +
+                "UPDATE {0} SET Value = @Value, ExpiresAtTime = @ExpiresAtTime," +
+                "SlidingExpirationInSeconds = @SlidingExpirationInSeconds, AbsoluteExpiration = @AbsoluteExpiration " +
+                "WHERE Id = @Id; " +
             "END ";
 
         private const string DeleteCacheItemFormat = "DELETE FROM {0} WHERE Id = @Id";
-
-        private const string UpdateCacheItemExpirationFormat = "UPDATE {0} SET ExpiresAtTime = @ExpiresAtTime " +
-            "WHERE Id = @Id";
 
         public const string DeleteExpiredCacheItemsFormat = "DELETE FROM {0} WHERE @UtcNow > ExpiresAtTime";
 
@@ -45,26 +60,25 @@ namespace Microsoft.Framework.Caching.SqlServer
             //TODO: sanitize schema and table name
 
             var tableNameWithSchema = string.Format("[{0}].[{1}]", schemaName, tableName);
-            TableInfo = string.Format(TableInfoFormat, schemaName, tableName);
-            GetCacheItem = string.Format(GetCacheItemFormat, tableNameWithSchema);
-            GetCacheItemExpirationInfo = string.Format(GetCacheItemExpirationInfoFormat, tableNameWithSchema);
+
+            // when retrieving an item, we do an UPDATE first and then a SELECT
+            GetCacheItem = string.Format(UpdateCacheItemFormat + GetCacheItemFormat, tableNameWithSchema);
+            GetCacheItemWithoutValue = string.Format(UpdateCacheItemFormat, tableNameWithSchema);
             DeleteCacheItem = string.Format(DeleteCacheItemFormat, tableNameWithSchema);
-            UpdateCacheItemExpiration = string.Format(UpdateCacheItemExpirationFormat, tableNameWithSchema);
             DeleteExpiredCacheItems = string.Format(DeleteExpiredCacheItemsFormat, tableNameWithSchema);
             SetCacheItem = string.Format(SetCacheItemFormat, tableNameWithSchema);
+            TableInfo = string.Format(TableInfoFormat, schemaName, tableName);
         }
 
         public string TableInfo { get; }
 
         public string GetCacheItem { get; }
 
-        public string GetCacheItemExpirationInfo { get; }
+        public string GetCacheItemWithoutValue { get; }
 
         public string SetCacheItem { get; }
 
         public string DeleteCacheItem { get; }
-
-        public string UpdateCacheItemExpiration { get; }
 
         public string DeleteExpiredCacheItems { get; }
     }

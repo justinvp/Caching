@@ -13,7 +13,7 @@ namespace Microsoft.Framework.Caching.SqlServer
 
         public DateTimeOffset ExpiresAtTime { get; set; }
 
-        public TimeSpan? SlidingExpirationInTicks { get; set; }
+        public TimeSpan? SlidingExpirationInSeconds { get; set; }
 
         public DateTimeOffset? AbsoluteExpiration { get; set; }
     }

@@ -10,7 +10,7 @@ namespace Microsoft.Framework.Caching.SqlServer
             public const string CacheItemId = "Id";
             public const string CacheItemValue = "Value";
             public const string ExpiresAtTime = "ExpiresAtTime";
-            public const string SlidingExpirationInTicks = "SlidingExpirationInTicks";
+            public const string SlidingExpirationInSeconds = "SlidingExpirationInSeconds";
             public const string AbsoluteExpiration = "AbsoluteExpiration";
         }
 
@@ -20,7 +20,7 @@ namespace Microsoft.Framework.Caching.SqlServer
             // are selecting the columns.
             public const int CacheItemIdIndex = 0;
             public const int ExpiresAtTimeIndex = 1;
-            public const int SlidingExpirationInTicksIndex = 2;
+            public const int SlidingExpirationInSecondsIndex = 2;
             public const int AbsoluteExpirationIndex = 3;
             public const int CacheItemValueIndex = 4;
         }
