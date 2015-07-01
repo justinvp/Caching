@@ -5,18 +5,6 @@ namespace Microsoft.Framework.Caching.SqlServer
 {
     internal class SqlQueries
     {
-        private const string CreateTableFormat = "CREATE TABLE {0}(" +
-            // add collation to the key column to make it case-sensitive
-            "Id nvarchar(900) COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL, " +
-            "Value varbinary(MAX) NOT NULL, " +
-            "ExpiresAtTime datetimeoffset NOT NULL, " +
-            "SlidingExpirationInTicks bigint NULL," +
-            "AbsoluteExpiration datetimeoffset NULL, " +
-            "CONSTRAINT pk_Id PRIMARY KEY (Id))";
-
-        private const string CreateNonClusteredIndexOnExpirationTimeFormat
-            = "CREATE NONCLUSTERED INDEX Index_ExpiresAtTime ON {0}(ExpiresAtTime)";
-
         private const string TableInfoFormat =
             "SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE " +
             "FROM INFORMATION_SCHEMA.TABLES " +
@@ -57,10 +45,6 @@ namespace Microsoft.Framework.Caching.SqlServer
             //TODO: sanitize schema and table name
 
             var tableNameWithSchema = string.Format("[{0}].[{1}]", schemaName, tableName);
-            CreateTable = string.Format(CreateTableFormat, tableNameWithSchema);
-            CreateNonClusteredIndexOnExpirationTime = string.Format(
-                CreateNonClusteredIndexOnExpirationTimeFormat,
-                tableNameWithSchema);
             TableInfo = string.Format(TableInfoFormat, schemaName, tableName);
             GetCacheItem = string.Format(GetCacheItemFormat, tableNameWithSchema);
             GetCacheItemExpirationInfo = string.Format(GetCacheItemExpirationInfoFormat, tableNameWithSchema);
@@ -69,12 +53,6 @@ namespace Microsoft.Framework.Caching.SqlServer
             DeleteExpiredCacheItems = string.Format(DeleteExpiredCacheItemsFormat, tableNameWithSchema);
             SetCacheItem = string.Format(SetCacheItemFormat, tableNameWithSchema);
         }
-
-        public string CreateTable { get; }
-
-        public string CreateNonClusteredIndexOnExpirationTime { get; }
-
-        public string GetTableSchema { get; }
 
         public string TableInfo { get; }
 

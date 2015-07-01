@@ -8,7 +8,6 @@ using Microsoft.Framework.Caching.Distributed;
 using Microsoft.Framework.Caching.Memory;
 using Microsoft.Framework.Caching.SqlServer;
 using Microsoft.Framework.Configuration;
-using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
 using Microsoft.Framework.Runtime;
 
