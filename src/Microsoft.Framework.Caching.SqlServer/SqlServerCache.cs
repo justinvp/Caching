@@ -155,6 +155,7 @@ namespace Microsoft.Framework.Caching.SqlServer
         private void ScanForExpiredItemsIfRequired()
         {
             var utcNow = _systemCock.UtcNow;
+            // TODO: Multiple threads could trigger this scan which leads to multiple calls to database.
             if ((utcNow - _lastExpirationScan) > _expiredItemsDeletionInterval)
             {
                 _lastExpirationScan = utcNow;

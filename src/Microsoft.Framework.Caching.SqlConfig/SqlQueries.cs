@@ -1,6 +1,8 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
+
 namespace Microsoft.Framework.Caching.SqlConfig
 {
     internal class SqlQueries
@@ -25,14 +27,22 @@ namespace Microsoft.Framework.Caching.SqlConfig
 
         public SqlQueries(string schemaName, string tableName)
         {
-            //TODO: sanitize schema and table name
+            if (string.IsNullOrEmpty(schemaName))
+            {
+                throw new ArgumentException("Schema name cannot be empty or null");
+            }
+            if (string.IsNullOrEmpty(tableName))
+            {
+                throw new ArgumentException("Table name cannot be empty or null");
+            }
 
-            var tableNameWithSchema = string.Format("[{0}].[{1}]", schemaName, tableName);
+            var tableNameWithSchema = string.Format(
+                "{0}.{1}", DelimitIdentifier(schemaName), DelimitIdentifier(tableName));
             CreateTable = string.Format(CreateTableFormat, tableNameWithSchema);
             CreateNonClusteredIndexOnExpirationTime = string.Format(
                 CreateNonClusteredIndexOnExpirationTimeFormat,
                 tableNameWithSchema);
-            TableInfo = string.Format(TableInfoFormat, schemaName, tableName);
+            TableInfo = string.Format(TableInfoFormat, EscapeLiteral(schemaName), EscapeLiteral(tableName));
         }
 
         public string CreateTable { get; }
@@ -40,5 +50,16 @@ namespace Microsoft.Framework.Caching.SqlConfig
         public string CreateNonClusteredIndexOnExpirationTime { get; }
 
         public string TableInfo { get; }
+
+        // From EF's SqlServerQuerySqlGenerator
+        private string DelimitIdentifier(string identifier)
+        {
+            return "[" + identifier.Replace("]", "]]") + "]";
+        }
+
+        private string EscapeLiteral(string literal)
+        {
+            return literal.Replace("'", "''");
+        }
     }
 }

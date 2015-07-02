@@ -1,6 +1,8 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using Microsoft.Framework.Internal;
+
 namespace Microsoft.Framework.Caching.SqlServer
 {
     internal class SqlQueries
@@ -59,7 +61,8 @@ namespace Microsoft.Framework.Caching.SqlServer
         {
             //TODO: sanitize schema and table name
 
-            var tableNameWithSchema = string.Format("[{0}].[{1}]", schemaName, tableName);
+            var tableNameWithSchema = string.Format(
+                "{0}.{1}", DelimitIdentifier(schemaName), DelimitIdentifier(tableName));
 
             // when retrieving an item, we do an UPDATE first and then a SELECT
             GetCacheItem = string.Format(UpdateCacheItemFormat + GetCacheItemFormat, tableNameWithSchema);
@@ -67,7 +70,7 @@ namespace Microsoft.Framework.Caching.SqlServer
             DeleteCacheItem = string.Format(DeleteCacheItemFormat, tableNameWithSchema);
             DeleteExpiredCacheItems = string.Format(DeleteExpiredCacheItemsFormat, tableNameWithSchema);
             SetCacheItem = string.Format(SetCacheItemFormat, tableNameWithSchema);
-            TableInfo = string.Format(TableInfoFormat, schemaName, tableName);
+            TableInfo = string.Format(TableInfoFormat, EscapeLiteral(schemaName), EscapeLiteral(tableName));
         }
 
         public string TableInfo { get; }
@@ -81,5 +84,16 @@ namespace Microsoft.Framework.Caching.SqlServer
         public string DeleteCacheItem { get; }
 
         public string DeleteExpiredCacheItems { get; }
+
+        // From EF's SqlServerQuerySqlGenerator
+        private string DelimitIdentifier(string identifier)
+        {
+            return "[" + identifier.Replace("]", "]]") + "]";
+        }
+
+        private string EscapeLiteral(string literal)
+        {
+            return literal.Replace("'", "''");
+        }
     }
 }

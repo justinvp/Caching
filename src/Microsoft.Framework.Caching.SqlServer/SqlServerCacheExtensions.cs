@@ -10,10 +10,13 @@ namespace Microsoft.Framework.DependencyInjection
 {
     public static class SqlServerCacheExtensions
     {
-        public static IServiceCollection AddSqlServerCache([NotNull] this IServiceCollection services)
+        public static IServiceCollection AddSqlServerCache(
+            [NotNull] this IServiceCollection services,
+            [NotNull] Action<SqlServerCacheOptions> options)
         {
             services.AddOptions();
             AddSqlServerCacheServices(services);
+            services.Configure(options);
             return services;
         }
 
