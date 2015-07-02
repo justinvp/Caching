@@ -7,7 +7,7 @@ using System.Data.SqlClient;
 using Microsoft.Framework.Logging;
 using Microsoft.Framework.Runtime.Common.CommandLine;
 
-namespace SqlServerCache
+namespace Microsoft.Framework.Caching.SqlConfig
 {
     public class Program
     {

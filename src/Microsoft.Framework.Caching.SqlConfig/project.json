@@ -1,6 +1,6 @@
 {
     "commands": {
-        "sqlservercache": "SqlServerCache"
+        "sqlservercache": "Microsoft.Framework.Caching.SqlConfig"
     },
     "dependencies": {
         "Microsoft.Framework.CommandLineUtils.Sources": { "version": "1.0.0-*", "type": "build" },
