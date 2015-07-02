@@ -162,7 +162,7 @@ namespace Microsoft.Framework.Caching.SqlServer
                     .AddCacheItemValue(value)
                     .AddSlidingExpirationInSeconds(options.SlidingExpiration)
                     .AddAbsoluteExpirationMono(absoluteExpiration)
-                    .AddWithValue("UtcNow", SqlDbType.DateTimeOffset, utcNow);
+                    .AddWithValue("UtcNow", SqlDbType.DateTime, utcNow.UtcDateTime);
 
                 connection.Open();
 
@@ -200,7 +200,7 @@ namespace Microsoft.Framework.Caching.SqlServer
                     .AddCacheItemValue(value)
                     .AddSlidingExpirationInSeconds(options.SlidingExpiration)
                     .AddAbsoluteExpirationMono(absoluteExpiration)
-                    .AddWithValue("UtcNow", SqlDbType.DateTimeOffset, utcNow);
+                    .AddWithValue("UtcNow", SqlDbType.DateTime, utcNow.UtcDateTime);
 
                 await connection.OpenAsync();
 
