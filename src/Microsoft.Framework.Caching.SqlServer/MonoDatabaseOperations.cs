@@ -76,9 +76,6 @@ namespace Microsoft.Framework.Caching.SqlServer
                 }
             }
 
-            //UpdateCacheItemExpiration(
-            //    key, utcNow, expirationTime, slidingExpiration, absoluteExpiration);
-
             return value;
         }
 
@@ -140,9 +137,6 @@ namespace Microsoft.Framework.Caching.SqlServer
                     return null;
                 }
             }
-
-            //await UpdateCacheItemExpirationAsync(
-            //    key, utcNow, expirationTime, slidingExpiration, absoluteExpiration);
 
             return value;
         }
