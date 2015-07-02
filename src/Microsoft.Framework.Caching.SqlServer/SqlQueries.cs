@@ -40,17 +40,14 @@ namespace Microsoft.Framework.Caching.SqlServer
                     "ELSE " +
                     "DATEADD(SECOND, Convert(bigint, @SlidingExpirationInSeconds), @UtcNow) " +
             "END);" +
-            "IF NOT EXISTS(SELECT Id FROM {0} WHERE Id = @Id) " +
+            "UPDATE {0} SET Value = @Value, ExpiresAtTime = @ExpiresAtTime," +
+            "SlidingExpirationInSeconds = @SlidingExpirationInSeconds, AbsoluteExpiration = @AbsoluteExpiration " +
+            "WHERE Id = @Id " +
+            "IF (@@ROWCOUNT = 0) " +
             "BEGIN " +
                 "INSERT INTO {0} " +
-                    "(Id, Value, ExpiresAtTime, SlidingExpirationInSeconds, AbsoluteExpiration) " +
-                    "VALUES (@Id, @Value, @ExpiresAtTime, @SlidingExpirationInSeconds, @AbsoluteExpiration); " +
-            "END " +
-            "ELSE " +
-            "BEGIN " +
-                "UPDATE {0} SET Value = @Value, ExpiresAtTime = @ExpiresAtTime," +
-                "SlidingExpirationInSeconds = @SlidingExpirationInSeconds, AbsoluteExpiration = @AbsoluteExpiration " +
-                "WHERE Id = @Id; " +
+                "(Id, Value, ExpiresAtTime, SlidingExpirationInSeconds, AbsoluteExpiration) " +
+                "VALUES (@Id, @Value, @ExpiresAtTime, @SlidingExpirationInSeconds, @AbsoluteExpiration); " +
             "END ";
 
         private const string DeleteCacheItemFormat = "DELETE FROM {0} WHERE Id = @Id";
