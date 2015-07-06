@@ -159,11 +159,11 @@ namespace Microsoft.Framework.Caching.SqlServer
             if ((utcNow - _lastExpirationScan) > _expiredItemsDeletionInterval)
             {
                 _lastExpirationScan = utcNow;
-                ThreadPool.QueueUserWorkItem(DeleteExpiredCacheItems, state: null);
+                Task.Factory.StartNew(DeleteExpiredCacheItems);
             }
         }
 
-        private void DeleteExpiredCacheItems(object state)
+        private void DeleteExpiredCacheItems()
         {
             _dbOperations.DeleteExpiredCacheItems();
         }
